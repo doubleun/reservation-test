@@ -3,7 +3,7 @@ import RoomDetail from './components/RoomDetail'
 import { mockGetRoomData } from '../components/RoomCard/RoomCardContainer'
 
 const roomPageTwClass = {
-  nav: `container px-10 pt-6`,
+  nav: `container mx-auto pt-6`,
   button: `bg-slate-700 rounded-md p-2 text-white font-bold`,
 }
 

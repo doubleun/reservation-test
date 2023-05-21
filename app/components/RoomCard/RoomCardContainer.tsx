@@ -1,4 +1,4 @@
-import RenderRoomCard from './renderRoomCard'
+import RenderRoomCard from './RenderRoomCard'
 
 const roomCardContainerTwClass = `grid grid-cols-2 grid-rows-1 place-items-center gap-y-4 py-8`
 

@@ -4,9 +4,8 @@ import Image from 'next/image'
 import Link from 'next/link'
 import Badge from '../Badge'
 import { RoomInterface } from './RoomCardContainer'
-import { useEffect, useState } from 'react'
-import { getUserInfo } from '@/app/utils'
-import useSWR, { useSWRConfig } from 'swr'
+import { getUserInfo, searchUserReserved } from '@/app/utils'
+import useSWR from 'swr'
 
 const roomCardTwClass = {
   roomCard: ``,
@@ -19,7 +18,6 @@ function RenderRoomCard({ roomData }: { roomData: RoomInterface[] }) {
   if (!user) return <h1>User data not found</h1>
 
   console.log('user: ', user)
-  console.log('user.reservations.get(room.id): ', user.reservations.get('1'))
   return (
     <>
       {roomData.map((room) => {
@@ -35,8 +33,12 @@ function RenderRoomCard({ roomData }: { roomData: RoomInterface[] }) {
             </div>
             <div className="card-content">
               <div className={roomCardTwClass.roomNo}>
-                <h2>Room {room.roomNo}</h2>
-                {!!user.reservations.get(room.id)}
+                <h2>Room: {room.roomNo}</h2>
+                {searchUserReserved(room.id) ? (
+                  <Badge text="Reserved" />
+                ) : (
+                  <h1>ddd</h1>
+                )}
               </div>
               <p>Capacity: {room.capacity}</p>
               <p>

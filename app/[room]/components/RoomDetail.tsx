@@ -1,7 +1,6 @@
 'use client'
 
 import Image from 'next/image'
-import { useUserInfo } from '@/app/utils/hooks/user'
 import {
   RoomInterface,
   mockGetRoomData,
@@ -10,8 +9,8 @@ import {
   addRoomToUser,
   getUserInfo,
   removeRoomFromUser,
+  searchUserReserved,
 } from '@/app/utils/user'
-import { useState } from 'react'
 import useSWR, { useSWRConfig } from 'swr'
 
 const roomDetailTwClass = {
@@ -26,7 +25,7 @@ const roomDetailTwClass = {
 
 function RoomDetail({ room }: { room: RoomInterface }) {
   const { data: user, mutate } = useSWR('/user', getUserInfo)
-  const [userInfo, setUserInfo] = useState(user)
+  // const [userInfo, setUserInfo] = useState(user)
   if (!user) return <h1>User data not found</h1>
 
   // reserve function
@@ -38,7 +37,7 @@ function RoomDetail({ room }: { room: RoomInterface }) {
 
       // add new room reservation
       addRoomToUser(room, mutate)
-      setUserInfo(user)
+      // setUserInfo(user)
     } catch (err) {
       console.error(err)
     }
@@ -49,7 +48,7 @@ function RoomDetail({ room }: { room: RoomInterface }) {
     try {
       // cancel room reservation
       removeRoomFromUser(roomId, mutate)
-      setUserInfo(user)
+      // setUserInfo(user)
     } catch (err) {
       console.error(err)
     }
@@ -82,12 +81,12 @@ function RoomDetail({ room }: { room: RoomInterface }) {
           <button
             className={roomDetailTwClass.reserveButton}
             onClick={() => handleReserveRoom(room.id)}
-            disabled={!!userInfo?.reservations.get(room.id)}
+            disabled={searchUserReserved(room.id)}
           >
             Reserved
           </button>
           {/* display cancel reservation button */}
-          {!!userInfo?.reservations.get(room.id) && (
+          {searchUserReserved(room.id) && (
             <button
               className={roomDetailTwClass.cancelButton}
               onClick={() => handleCancelRoom(room.id)}

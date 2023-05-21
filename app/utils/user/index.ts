@@ -4,12 +4,18 @@ import { KeyedMutator } from 'swr'
 
 export interface UserInfoInterface {
   role: 'user' | 'admin'
-  reservations: Map<string, RoomInterface>
+  reservations: RoomInterface[]
 }
 
 let userInfo: UserInfoInterface = {
   role: 'user',
-  reservations: new Map(),
+  reservations: [],
+}
+
+export const searchUserReserved = (roomId: string): boolean => {
+  return Boolean(
+    userInfo.reservations.find((reservedRoom) => reservedRoom.id === roomId)
+  )
 }
 
 export const setUserInfo = (
@@ -29,11 +35,16 @@ export const addRoomToUser = (
   mutate?: KeyedMutator<UserInfoInterface>
 ) => {
   // check if room exists
-  if (userInfo.reservations.get(room.id))
+  if (searchUserReserved(room.id))
     throw new Error('Reservation - Room is already reserved')
 
-  userInfo.reservations.set(room.id, room)
-  mutate && mutate({ ...userInfo })
+  console.log('behind - userInfo', userInfo)
+  const newReservations: UserInfoInterface['reservations'] = [
+    ...userInfo.reservations,
+    room,
+  ]
+  userInfo = { ...userInfo, reservations: newReservations }
+  mutate && mutate({ ...userInfo, reservations: newReservations })
 }
 
 export const removeRoomFromUser = (
@@ -41,14 +52,18 @@ export const removeRoomFromUser = (
   mutate?: KeyedMutator<UserInfoInterface>
 ) => {
   // check if room exists
-  if (!userInfo.reservations.get(roomId))
+  if (!searchUserReserved(roomId))
     throw new Error('Cancel - Room is not found in current user')
 
-  userInfo.reservations.delete(roomId)
   console.log('behind - userInfo', userInfo)
-  mutate && mutate({ ...userInfo })
+  const newReservations: UserInfoInterface['reservations'] =
+    userInfo.reservations.filter((reserved) => reserved.id !== roomId)
+  userInfo = { ...userInfo, reservations: newReservations }
+  mutate && mutate({ ...userInfo, reservations: newReservations })
 }
 
-export const getUserInfo = (): UserInfoInterface => {
-  return userInfo
+export const getUserInfo = async (): Promise<UserInfoInterface> => {
+  return new Promise((resolve) => {
+    resolve(userInfo)
+  })
 }
