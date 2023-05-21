@@ -2,16 +2,14 @@
 
 import Image from 'next/image'
 import {
-  RoomInterface,
-  mockGetRoomData,
-} from '@/app/components/RoomCard/RoomCardContainer'
-import {
   addRoomToUser,
+  checkRoomAvailability,
   getUserInfo,
   removeRoomFromUser,
   searchUserReserved,
 } from '@/app/utils/user'
-import useSWR, { useSWRConfig } from 'swr'
+import useSWR from 'swr'
+import { mockGetRoomData } from '@/app/service'
 
 const roomDetailTwClass = {
   container: `container mx-auto my-6`,
@@ -23,35 +21,43 @@ const roomDetailTwClass = {
   cancelButton: `bg-red-700 rounded-md p-2 text-white`,
 }
 
-function RoomDetail({ room }: { room: RoomInterface }) {
-  const { data: user, mutate } = useSWR('/user', getUserInfo)
-  // const [userInfo, setUserInfo] = useState(user)
-  if (!user) return <h1>User data not found</h1>
+function RoomDetail({ roomId }: { roomId: string | undefined }) {
+  if (!roomId) return <h1>Room Id not found</h1>
+
+  const { data: user, mutate, error: userError } = useSWR('/user', getUserInfo)
+
+  const { data: room, error: roomError } = useSWR(`/room/${roomId}`, (_) =>
+    mockGetRoomData(roomId)
+  )
+  console.log('room: ', room)
+
+  // check user and room data validity
+  if (!user || userError || !room || roomError || Array.isArray(room))
+    return <h1>Invalid user or room data found</h1>
 
   // reserve function
-  const handleReserveRoom = (roomId: string) => {
+  const handleReserveRoom = () => {
     try {
-      const room = mockGetRoomData(roomId)
-      if (!room || Array.isArray(room))
-        throw new Error('Reservation - Room data is invalid')
-
       // add new room reservation
       addRoomToUser(room, mutate)
-      // setUserInfo(user)
     } catch (err) {
       console.error(err)
     }
   }
 
   // cancel function
-  const handleCancelRoom = (roomId: string) => {
+  const handleCancelRoom = () => {
     try {
       // cancel room reservation
       removeRoomFromUser(roomId, mutate)
-      // setUserInfo(user)
     } catch (err) {
       console.error(err)
     }
+  }
+
+  // check available date
+  const handleCheckAvailability = (): boolean => {
+    return !!searchUserReserved(room.id) || checkRoomAvailability(room)
   }
 
   return (
@@ -80,8 +86,8 @@ function RoomDetail({ room }: { room: RoomInterface }) {
         <div className={roomDetailTwClass.buttonContainer}>
           <button
             className={roomDetailTwClass.reserveButton}
-            onClick={() => handleReserveRoom(room.id)}
-            disabled={searchUserReserved(room.id)}
+            onClick={handleReserveRoom}
+            disabled={handleCheckAvailability()}
           >
             Reserved
           </button>
@@ -89,7 +95,7 @@ function RoomDetail({ room }: { room: RoomInterface }) {
           {searchUserReserved(room.id) && (
             <button
               className={roomDetailTwClass.cancelButton}
-              onClick={() => handleCancelRoom(room.id)}
+              onClick={handleCancelRoom}
             >
               Cancel
             </button>

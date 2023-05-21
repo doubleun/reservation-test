@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import RoomDetail from './components/RoomDetail'
-import { mockGetRoomData } from '../components/RoomCard/RoomCardContainer'
+import { mockGetRoomData } from '../service'
 
 const roomPageTwClass = {
   nav: `container mx-auto pt-6`,
@@ -9,9 +9,7 @@ const roomPageTwClass = {
 
 export default function Room({ params }: { params: { room?: string } }) {
   // can be get from cache
-  const roomData = mockGetRoomData(params?.room)
-  if (!roomData || Array.isArray(roomData))
-    return <h1>Invalid room data found</h1>
+  console.log('params: ', params)
   return (
     <main>
       <nav className={roomPageTwClass.nav}>
@@ -23,7 +21,7 @@ export default function Room({ params }: { params: { room?: string } }) {
           </li>
         </ul>
       </nav>
-      <RoomDetail room={roomData} />
+      <RoomDetail roomId={params?.room} />
     </main>
   )
 }

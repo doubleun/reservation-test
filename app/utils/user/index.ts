@@ -1,4 +1,4 @@
-import { RoomInterface } from '@/app/components/RoomCard/RoomCardContainer'
+import { RoomInterface } from '@/app/service'
 import { Dispatch, SetStateAction } from 'react'
 import { KeyedMutator } from 'swr'
 
@@ -12,9 +12,19 @@ let userInfo: UserInfoInterface = {
   reservations: [],
 }
 
-export const searchUserReserved = (roomId: string): boolean => {
-  return Boolean(
-    userInfo.reservations.find((reservedRoom) => reservedRoom.id === roomId)
+export const searchUserReserved = (
+  roomId: string
+): RoomInterface | undefined => {
+  return userInfo.reservations.find(
+    (reservedRoom) => reservedRoom.id === roomId
+  )
+}
+
+export const checkRoomAvailability = (room: RoomInterface) => {
+  const currentDate = new Date().getTime()
+  return (
+    room.availableTime.start.getTime() > currentDate ||
+    currentDate > room.availableTime.end.getTime()
   )
 }
 

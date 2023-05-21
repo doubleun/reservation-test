@@ -3,9 +3,13 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import Badge from '../Badge'
-import { RoomInterface } from './RoomCardContainer'
-import { getUserInfo, searchUserReserved } from '@/app/utils'
+import {
+  checkRoomAvailability,
+  getUserInfo,
+  searchUserReserved,
+} from '@/app/utils'
 import useSWR from 'swr'
+import { RoomInterface } from '@/app/service'
 
 const roomCardTwClass = {
   roomCard: ``,
@@ -34,10 +38,9 @@ function RenderRoomCard({ roomData }: { roomData: RoomInterface[] }) {
             <div className="card-content">
               <div className={roomCardTwClass.roomNo}>
                 <h2>Room: {room.roomNo}</h2>
-                {searchUserReserved(room.id) ? (
-                  <Badge text="Reserved" />
-                ) : (
-                  <h1>ddd</h1>
+                {searchUserReserved(room.id) && <Badge text="Reserved" />}
+                {checkRoomAvailability(room) && (
+                  <Badge text="Not available" className="bg-red-600" />
                 )}
               </div>
               <p>Capacity: {room.capacity}</p>
