@@ -1,16 +1,14 @@
 'use client'
 
 import Image from 'next/image'
-import {
-  addRoomToUser,
-  checkRoomAvailability,
-  getUserInfo,
-  removeRoomFromUser,
-  searchUserReserved,
-} from '@/app/utils/user'
 import useSWR, { useSWRConfig } from 'swr'
-import { mockGetRoomData } from '@/app/service'
+import {
+  RoomInterface,
+  mockGetRoomData,
+  updateMockRoomData,
+} from '@/app/service'
 import { useRef } from 'react'
+import { useRouter } from 'next/navigation'
 
 const roomDetailTwClass = {
   container: `container mx-auto my-6`,
@@ -20,12 +18,21 @@ const roomDetailTwClass = {
   textInput: `flex gap-4`,
   dateInput: `border-2 border-slate-500`,
   buttonContainer: `flex justify-between mt-4`,
+  dateInputContainer: ``,
   submitButton: `bg-blue-700 rounded-md p-2 text-white disabled:bg-slate-800 disabled:cursor-not-allowed`,
+}
+
+interface EditRoomFormInterface extends HTMLFormControlsCollection {
+  roomNo: HTMLInputElement
+  capacity: HTMLInputElement
+  dateStart: HTMLInputElement
+  dateEnd: HTMLInputElement
 }
 
 // TODO: Reuse the same room detail components
 function EditRoomDetail({ roomId }: { roomId: string | undefined }) {
   const formRef = useRef<HTMLFormElement>(null)
+  const router = useRouter()
   if (!roomId) return <h1>Room Id not found</h1>
 
   const {
@@ -40,13 +47,39 @@ function EditRoomDetail({ roomId }: { roomId: string | undefined }) {
 
   // reserve function
   const handleSubmitRoom = (e: React.FormEvent<HTMLFormElement>) => {
+    if (!formRef.current) return
+    const { roomNo, capacity, dateStart, dateEnd } =
+      (formRef.current?.elements as EditRoomFormInterface) ?? {}
+
     e.preventDefault()
     try {
-      // edit room detail
-      console.log('handle submit room')
+      // validate form
+      if (
+        !roomNo?.value ||
+        !capacity?.value ||
+        !dateStart?.value ||
+        !dateEnd?.value
+      ) {
+        throw new Error('Form values are missing')
+      }
 
-      // addRoomToUser(room, mutate)
+      // edit room detail
+      const newRoomData: RoomInterface = {
+        ...room,
+        roomNo: Number(roomNo.value),
+        capacity: Number(capacity.value),
+        availableTime: {
+          start: new Date(dateStart.value),
+          end: new Date(dateEnd.value),
+        },
+      }
+      // updateRoom
+      console.log('oldRoomData: ', room)
+      console.log('newRoomData: ', newRoomData)
+      updateMockRoomData({ data: newRoomData, mutate })
       revalidate(`/${roomId}`)
+      revalidate(`/`)
+      router.refresh()
     } catch (err) {
       console.error(err)
     }
@@ -56,6 +89,7 @@ function EditRoomDetail({ roomId }: { roomId: string | undefined }) {
     <div className={roomDetailTwClass.container}>
       <form
         ref={formRef}
+        name="form"
         onSubmit={handleSubmitRoom}
         className={roomDetailTwClass.detailContainer}
       >
@@ -76,15 +110,17 @@ function EditRoomDetail({ roomId }: { roomId: string | undefined }) {
             <h2>Room: </h2>
             <input
               type="number"
+              id="roomNo"
               className="border-2 border-slate-600 rounded-sm"
-              defaultValue={room.capacity}
+              defaultValue={room.roomNo}
             />
           </div>
           {/* Capacity - input */}
           <div className={roomDetailTwClass.textInput}>
-            <p>Capacity: {room.capacity}</p>
+            <p>Capacity: </p>
             <input
               type="number"
+              id="capacity"
               className="border-2 border-slate-600 rounded-sm"
               defaultValue={room.capacity}
             />
@@ -94,21 +130,19 @@ function EditRoomDetail({ roomId }: { roomId: string | undefined }) {
             <p>Date Available:</p>
             <input
               type="date"
-              id="start"
-              name="start"
+              id="dateStart"
               className={roomDetailTwClass.dateInput}
-              defaultValue={room.availableTime.start
-                .toISOString()
-                .substring(0, 10)}
+              defaultValue={room?.availableTime?.start
+                ?.toISOString()
+                ?.substring(0, 10)}
             />
             <input
               type="date"
-              id="end"
-              name="end"
+              id="dateEnd"
               className={roomDetailTwClass.dateInput}
-              defaultValue={room.availableTime.end
-                .toISOString()
-                .substring(0, 10)}
+              defaultValue={room?.availableTime?.end
+                ?.toISOString()
+                ?.substring(0, 10)}
             />
           </div>
         </div>

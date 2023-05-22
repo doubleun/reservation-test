@@ -1,5 +1,5 @@
 import RoomNavBar from '@/app/[room]/components/RoomNavBar'
-import EditRoomDetail from '../components/EdirRoomDetail'
+import EditRoomDetail from '../components/EdiTRoomDetail'
 
 export default function Room({ params }: { params: { room?: string } }) {
   return (
