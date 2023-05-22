@@ -29,7 +29,6 @@ function RoomDetail({ roomId }: { roomId: string | undefined }) {
   const { data: room, error: roomError } = useSWR(`/room/${roomId}`, (_) =>
     mockGetRoomData(roomId)
   )
-  console.log('room: ', room)
 
   // check user and room data validity
   if (!user || userError || !room || roomError || Array.isArray(room))

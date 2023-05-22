@@ -4,6 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import Badge from '../Badge'
 import {
+  UserRoles,
   checkRoomAvailability,
   getUserInfo,
   searchUserReserved,
@@ -17,7 +18,13 @@ const roomCardTwClass = {
   button: `bg-blue-700 text-white py-1 px-4 rounded-md`,
 }
 
-function RenderRoomCard({ roomData }: { roomData: RoomInterface[] }) {
+function RenderRoomCard({
+  roomData,
+  roleEnter = UserRoles.user,
+}: {
+  roomData: RoomInterface[]
+  roleEnter?: UserRoles
+}) {
   const { data: user } = useSWR('/user', getUserInfo)
   if (!user) return <h1>User data not found</h1>
 
@@ -51,9 +58,21 @@ function RenderRoomCard({ roomData }: { roomData: RoomInterface[] }) {
             </div>
             <div className="card-footer">
               {/* insert your buttons or other footer components here */}
-              <Link className={roomCardTwClass.button} href={`/${room.id}`}>
-                View
-              </Link>
+              {roleEnter === UserRoles.user && (
+                <Link className={roomCardTwClass.button} href={`/${room.id}`}>
+                  View
+                </Link>
+              )}
+
+              {/* for admin */}
+              {roleEnter === UserRoles.admin && (
+                <Link
+                  className={roomCardTwClass.button}
+                  href={`/admin/${room.id}`}
+                >
+                  Edit
+                </Link>
+              )}
             </div>
           </div>
         )

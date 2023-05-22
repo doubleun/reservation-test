@@ -113,3 +113,13 @@ export const mockGetRoomData = async (
     })
   }
 }
+
+// export const updateMockRoomData = async ({
+//   roomId,
+//   data,
+// }: {
+//   roomId: string
+//   data: RoomInterface
+// }) => {
+//   mockGetRoomData
+// }

@@ -2,13 +2,19 @@ import { RoomInterface } from '@/app/service'
 import { Dispatch, SetStateAction } from 'react'
 import { KeyedMutator } from 'swr'
 
+// TODO: use object as type is better than enum
+export enum UserRoles {
+  user,
+  admin,
+}
+
 export interface UserInfoInterface {
-  role: 'user' | 'admin'
+  role: UserRoles
   reservations: RoomInterface[]
 }
 
 let userInfo: UserInfoInterface = {
-  role: 'user',
+  role: UserRoles.user,
   reservations: [],
 }
 
@@ -32,7 +38,7 @@ export const setUserInfo = (
   newUserInfo: UserInfoInterface,
   setState?: Dispatch<SetStateAction<UserInfoInterface>>
 ) => {
-  if (newUserInfo?.role !== 'user' || !newUserInfo?.reservations) {
+  if (newUserInfo?.role !== UserRoles.user || !newUserInfo?.reservations) {
     throw new Error('User data is incorrect')
   } else {
     userInfo = newUserInfo
